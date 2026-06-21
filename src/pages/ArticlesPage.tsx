@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ArticleCard } from "../features/articles/components/ArticleCard";
 import { mockArticles } from "../features/articles/data/mockArticles";
 
 export function ArticlesPage() {
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("All");
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category") ?? "All";
 
   const filteredArticles = useMemo(() => {
     return mockArticles.filter((article) => {
@@ -18,9 +22,13 @@ export function ArticlesPage() {
       const matchesDifficulty =
         difficulty === "All" || article.difficulty === difficulty;
 
-      return matchesSearch && matchesDifficulty;
+      const matchesCategory =
+        selectedCategory === "All" ||
+        article.category.toLowerCase() === selectedCategory.toLowerCase();
+
+      return matchesSearch && matchesDifficulty && matchesCategory;
     });
-  }, [search, difficulty]);
+  }, [search, difficulty, selectedCategory]);
 
   return (
     <section>
@@ -36,13 +44,32 @@ export function ArticlesPage() {
         </p>
       </div>
 
-      <div className="mb-8 grid gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 md:grid-cols-[1fr_220px]">
+      <div className="mb-8 grid gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 md:grid-cols-[1fr_220px_220px]">
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search articles..."
           className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-cyan-500"
         />
+
+        <select
+          value={selectedCategory}
+          onChange={(event) => {
+            const value = event.target.value;
+
+            if (value === "All") {
+              setSearchParams({});
+            } else {
+              setSearchParams({ category: value });
+            }
+          }}
+          className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-cyan-500"
+        >
+          <option>All</option>
+          <option value="react">React</option>
+          <option value="typescript">TypeScript</option>
+          <option value="fastapi">FastAPI</option>
+        </select>
 
         <select
           value={difficulty}
