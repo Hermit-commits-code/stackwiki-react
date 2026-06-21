@@ -163,7 +163,7 @@ export function TranscriptConverterPage() {
             value={transcript}
             onChange={(event) => setTranscript(event.target.value)}
             placeholder="Paste your raw transcript here..."
-            className="min-h-[520px] w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
+            className="min-h-130 w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
           />
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
@@ -301,7 +301,7 @@ export function TranscriptConverterPage() {
                   </h2>
 
                   {articleDraft ? (
-                    <pre className="max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
+                    <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
                       {articleDraft}
                     </pre>
                   ) : (

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   getSavedConversions,
   updateConversion,
+  deleteConversion,
 } from "../features/transcripts/storage/conversionStorage";
 
 export function ConversionDetailPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const conversion = getSavedConversions().find(
@@ -36,11 +38,12 @@ export function ConversionDetailPage() {
   }
 
   function handleSaveChanges() {
+    if (!conversion) return;
+
     updateConversion({
       ...conversion,
       markdown,
     });
-
     setSaveMessage("Changes saved locally.");
 
     window.setTimeout(() => {
@@ -48,6 +51,16 @@ export function ConversionDetailPage() {
     }, 3000);
   }
 
+  function handleDeleteDraft() {
+    const confirmed = window.confirm(
+      "Delete this draft? This cannot be undone.",
+    );
+
+    if (!confirmed) return;
+
+    deleteConversion(conversion.id);
+    navigate("/conversions");
+  }
   return (
     <section>
       <Link
@@ -90,6 +103,13 @@ export function ConversionDetailPage() {
           >
             Copy Markdown
           </button>
+          <button
+            type="button"
+            onClick={handleDeleteDraft}
+            className="rounded-lg border border-red-900 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-950"
+          >
+            Delete Draft
+          </button>
         </div>
 
         {saveMessage ? (
@@ -108,7 +128,7 @@ export function ConversionDetailPage() {
           <textarea
             value={markdown}
             onChange={(event) => setMarkdown(event.target.value)}
-            className="min-h-[600px] w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
+            className="min-h-150 w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
           />
         </div>
 

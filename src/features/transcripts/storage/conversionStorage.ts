@@ -44,3 +44,12 @@ export function updateConversion(updatedConversion: SavedConversion) {
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedConversions));
 }
+export function deleteConversion(id: string) {
+  const existingConversions = getSavedConversions();
+
+  const updatedConversions = existingConversions.filter(
+    (conversion) => conversion.id !== id,
+  );
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedConversions));
+}
