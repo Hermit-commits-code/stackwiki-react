@@ -7,6 +7,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { TranscriptConverterPage } from "./pages/TranscriptConverterPage";
 import { ConversionsPage } from "./pages/ConversionsPage";
+import { ConversionDetailPage } from "./pages/ConversionDetailPage"
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             element={<TranscriptConverterPage />}
           />
           <Route path="/conversions" element={<ConversionsPage />} />
+          <Route path="/conversions/:id" element={<ConversionDetailPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Route>

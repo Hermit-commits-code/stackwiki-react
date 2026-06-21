@@ -53,17 +53,18 @@ export function ConversionsPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-slate-800 bg-slate-900">
-          <div className="grid grid-cols-[1fr_160px_140px_180px] gap-4 border-b border-slate-800 px-5 py-3 text-sm font-semibold text-slate-300">
+          <div className="grid grid-cols-[1fr_160px_140px_180px_100px] gap-4 border-b border-slate-800 px-5 py-3 text-sm font-semibold text-slate-300">
             <span>Title</span>
             <span>Category</span>
             <span>Status</span>
             <span>Created</span>
+            <span>Action</span>
           </div>
 
           {conversions.map((conversion) => (
             <div
               key={conversion.id}
-              className="grid grid-cols-[1fr_160px_140px_180px] gap-4 border-b border-slate-800 px-5 py-4 text-sm last:border-b-0"
+              className="grid grid-cols-[1fr_160px_140px_180px_100px] gap-4 border-b border-slate-800 px-5 py-4 text-sm last:border-b-0"
             >
               <span className="font-semibold text-slate-100">
                 {conversion.title}
@@ -80,6 +81,13 @@ export function ConversionsPage() {
               <span className="text-slate-400">
                 {new Date(conversion.createdAt).toLocaleDateString()}
               </span>
+
+              <Link
+                to={`/conversions/${conversion.id}`}
+                className="font-semibold text-cyan-400 hover:text-cyan-300"
+              >
+                Open
+              </Link>
             </div>
           ))}
         </div>
