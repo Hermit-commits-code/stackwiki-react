@@ -5,6 +5,7 @@ const navItems = [
   { label: "Articles", href: "/articles" },
   { label: "Categories", href: "/categories" },
   { label: "Converter", href: "/transcript-converter" },
+  { label: "Conversions", href: "/conversions" },
   { label: "Login", href: "/login" },
 ];
 
