@@ -4,6 +4,7 @@ import {
   generateMetadata,
   type ArticleMetadata,
 } from "../features/transcripts/utils/generateArticleDraft";
+import ReactMarkdown from "react-markdown";
 
 export function TranscriptConverterPage() {
   const [transcript, setTranscript] = useState("");
@@ -193,19 +194,39 @@ export function TranscriptConverterPage() {
             </p>
           )}
 
-          <h2 className="mb-3 text-sm font-semibold text-slate-200">
-            Markdown Draft
-          </h2>
+          <div className="grid gap-4">
+            <div>
+              <h2 className="mb-3 text-sm font-semibold text-slate-200">
+                Markdown Draft
+              </h2>
 
-          {articleDraft ? (
-            <pre className="min-h-[420px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
-              {articleDraft}
-            </pre>
-          ) : (
-            <p className="text-sm text-slate-400">
-              Your generated markdown draft will appear here.
-            </p>
-          )}
+              {articleDraft ? (
+                <pre className="max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
+                  {articleDraft}
+                </pre>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  Your generated markdown draft will appear here.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <h2 className="mb-3 text-sm font-semibold text-slate-200">
+                Rendered Preview
+              </h2>
+
+              {articleDraft ? (
+                <div className="prose prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-950 p-5 text-slate-200">
+                  <ReactMarkdown>{articleDraft}</ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  Your rendered article preview will appear here.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
