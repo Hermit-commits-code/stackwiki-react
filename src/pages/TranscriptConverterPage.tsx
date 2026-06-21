@@ -68,6 +68,14 @@ export function TranscriptConverterPage() {
   const hasMetadata = metadata !== null;
   const hasDraft = articleDraft.trim().length > 0;
 
+  function handleResetDraft() {
+    setTranscript("");
+    setMetadata(null);
+    setTagsInput("");
+    setSaveMessage("");
+    setActiveTab("editor");
+  }
+
   // Major Return
   return (
     <section>
@@ -113,12 +121,23 @@ export function TranscriptConverterPage() {
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <label
-            htmlFor="transcript"
-            className="mb-3 block text-sm font-semibold text-slate-200"
-          >
-            Raw Transcript
-          </label>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <label
+              htmlFor="transcript"
+              className="block text-sm font-semibold text-slate-200"
+            >
+              Raw Transcript
+            </label>
+
+            <button
+              type="button"
+              onClick={handleResetDraft}
+              disabled={!transcript}
+              className="text-sm font-semibold text-slate-400 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Clear
+            </button>
+          </div>
 
           <textarea
             id="transcript"
@@ -128,13 +147,20 @@ export function TranscriptConverterPage() {
             className="min-h-[520px] w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
           />
         </div>
-
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-200">
               Article Settings
             </h2>
             <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleResetDraft}
+                disabled={!articleDraft}
+                className="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 hover:border-cyan-500 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Reset
+              </button>
               <button
                 type="button"
                 onClick={handleSaveDraft}
