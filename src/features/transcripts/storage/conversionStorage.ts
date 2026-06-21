@@ -34,3 +34,13 @@ export function saveConversion(conversion: SavedConversion) {
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedConversions));
 }
+
+export function updateConversion(updatedConversion: SavedConversion) {
+  const existingConversions = getSavedConversions();
+
+  const updatedConversions = existingConversions.map((conversion) =>
+    conversion.id === updatedConversion.id ? updatedConversion : conversion,
+  );
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedConversions));
+}
