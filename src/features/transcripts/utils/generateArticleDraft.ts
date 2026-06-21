@@ -1,10 +1,21 @@
-type TranscriptKind = "Technical Concept" | "Course Guidance" | "General Notes";
+export type TranscriptKind =
+  | "Technical Concept"
+  | "Course Guidance"
+  | "General Notes";
+
+export type ArticleMetadata = {
+  title: string;
+  category: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  type: TranscriptKind;
+  tags: string[];
+};
 
 function cleanTranscript(transcript: string) {
   return transcript.replace(/\s+/g, " ").trim();
 }
 
-function guessTranscriptKind(transcript: string): TranscriptKind {
+export function guessTranscriptKind(transcript: string): TranscriptKind {
   const text = transcript.toLowerCase();
 
   if (
@@ -32,35 +43,10 @@ function guessTranscriptKind(transcript: string): TranscriptKind {
   return "General Notes";
 }
 
-function guessTitle(transcript: string, kind: TranscriptKind) {
+export function generateMetadata(transcript: string): ArticleMetadata {
   const text = transcript.toLowerCase();
+  const kind = guessTranscriptKind(transcript);
 
-  if (kind === "Course Guidance") {
-    if (text.includes("take this course")) return "How to Take This Course";
-    return "Course Learning Strategy";
-  }
-
-  if (text.includes("expression")) return "Understanding Expressions";
-  if (text.includes("component")) return "Understanding React Components";
-  if (text.includes("route")) return "Understanding FastAPI Routes";
-
-  return "Untitled Article";
-}
-
-function guessCategory(transcript: string) {
-  const text = transcript.toLowerCase();
-
-  if (text.includes("react")) return "React";
-  if (text.includes("typescript")) return "TypeScript";
-  if (text.includes("fastapi")) return "FastAPI";
-  if (text.includes("python")) return "Python";
-  if (text.includes("course") || text.includes("learn")) return "Learning";
-
-  return "General";
-}
-
-function guessTags(transcript: string, kind: TranscriptKind) {
-  const text = transcript.toLowerCase();
   const tags: string[] = [];
 
   if (text.includes("react")) tags.push("react");
@@ -72,32 +58,54 @@ function guessTags(transcript: string, kind: TranscriptKind) {
     tags.push("learning-strategy", "course-notes", "study-plan");
   }
 
-  if (text.includes("expression")) tags.push("expressions");
-  if (text.includes("operator")) tags.push("operators");
-  if (text.includes("component")) tags.push("components");
-  if (text.includes("route")) tags.push("routes");
   if (text.includes("code along")) tags.push("code-along");
   if (text.includes("project")) tags.push("projects");
 
-  return Array.from(new Set(tags.length > 0 ? tags : ["notes"]));
+  let title = "Untitled Article";
+
+  if (kind === "Course Guidance" && text.includes("take this course")) {
+    title = "How to Take This Course";
+  } else if (text.includes("expression")) {
+    title = "Understanding Expressions";
+  } else if (text.includes("component")) {
+    title = "Understanding React Components";
+  } else if (text.includes("route")) {
+    title = "Understanding FastAPI Routes";
+  }
+
+  let category = "General";
+
+  if (text.includes("react")) category = "React";
+  else if (text.includes("typescript")) category = "TypeScript";
+  else if (text.includes("fastapi")) category = "FastAPI";
+  else if (text.includes("python")) category = "Python";
+  else if (text.includes("course") || text.includes("learn"))
+    category = "Learning";
+
+  return {
+    title,
+    category,
+    difficulty: "Beginner",
+    type: kind,
+    tags: Array.from(new Set(tags.length > 0 ? tags : ["notes"])),
+  };
 }
 
-function generateCourseGuidanceMarkdown(
-  transcript: string,
-  title: string,
-  category: string,
-  tags: string[],
-) {
+function generateFrontmatter(metadata: ArticleMetadata) {
   return `---
-title: ${title}
-category: ${category}
-difficulty: Beginner
-type: Course Guidance
+title: ${metadata.title}
+category: ${metadata.category}
+difficulty: ${metadata.difficulty}
+type: ${metadata.type}
 tags:
-${tags.map((tag) => `  - ${tag}`).join("\n")}
----
+${metadata.tags.map((tag) => `  - ${tag}`).join("\n")}
+---`;
+}
 
-# ${title}
+function generateCourseGuidanceMarkdown(metadata: ArticleMetadata) {
+  return `${generateFrontmatter(metadata)}
+
+# ${metadata.title}
 
 ## Overview
 
@@ -167,29 +175,16 @@ For this course, the best path is:
 - Building your own related projects creates real experience.
 - Debugging errors is part of becoming a developer.
 - StackWiki should turn each lesson into a reusable learning note.
-
-## Source Transcript Notes
-
-${transcript}
 `;
 }
 
 function generateTechnicalMarkdown(
+  metadata: ArticleMetadata,
   transcript: string,
-  title: string,
-  category: string,
-  tags: string[],
 ) {
-  return `---
-title: ${title}
-category: ${category}
-difficulty: Beginner
-type: Technical Concept
-tags:
-${tags.map((tag) => `  - ${tag}`).join("\n")}
----
+  return `${generateFrontmatter(metadata)}
 
-# ${title}
+# ${metadata.title}
 
 ## Overview
 
@@ -227,26 +222,21 @@ Break the topic into smaller pieces.
 `;
 }
 
-export function generateArticleDraft(transcript: string) {
+export function generateArticleDraft(
+  transcript: string,
+  metadata?: ArticleMetadata,
+) {
   const cleanedTranscript = cleanTranscript(transcript);
 
   if (!cleanedTranscript) {
     return "";
   }
 
-  const kind = guessTranscriptKind(cleanedTranscript);
-  const title = guessTitle(cleanedTranscript, kind);
-  const category = guessCategory(cleanedTranscript);
-  const tags = guessTags(cleanedTranscript, kind);
+  const articleMetadata = metadata ?? generateMetadata(cleanedTranscript);
 
-  if (kind === "Course Guidance") {
-    return generateCourseGuidanceMarkdown(
-      cleanedTranscript,
-      title,
-      category,
-      tags,
-    );
+  if (articleMetadata.type === "Course Guidance") {
+    return generateCourseGuidanceMarkdown(articleMetadata);
   }
 
-  return generateTechnicalMarkdown(cleanedTranscript, title, category, tags);
+  return generateTechnicalMarkdown(articleMetadata, cleanedTranscript);
 }

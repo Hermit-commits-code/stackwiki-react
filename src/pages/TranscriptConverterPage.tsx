@@ -1,13 +1,54 @@
-import { useMemo, useState } from "react";
-import { generateArticleDraft } from "../features/transcripts/utils/generateArticleDraft";
+import { useEffect, useMemo, useState } from "react";
+import {
+  generateArticleDraft,
+  generateMetadata,
+  type ArticleMetadata,
+} from "../features/transcripts/utils/generateArticleDraft";
 
 export function TranscriptConverterPage() {
   const [transcript, setTranscript] = useState("");
+  const [metadata, setMetadata] = useState<ArticleMetadata | null>(null);
+  const [tagsInput, setTagsInput] = useState("");
 
-  const articleDraft = useMemo(
-    () => generateArticleDraft(transcript),
-    [transcript],
-  );
+  useEffect(() => {
+    if (!transcript.trim()) {
+      setMetadata(null);
+      setTagsInput("");
+      return;
+    }
+
+    const generatedMetadata = generateMetadata(transcript);
+    setMetadata(generatedMetadata);
+    setTagsInput(generatedMetadata.tags.join(", "));
+  }, [transcript]);
+
+  const articleDraft = useMemo(() => {
+    if (!metadata) return "";
+
+    const tags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    return generateArticleDraft(transcript, {
+      ...metadata,
+      tags,
+    });
+  }, [transcript, metadata, tagsInput]);
+
+  function updateMetadata<K extends keyof ArticleMetadata>(
+    key: K,
+    value: ArticleMetadata[K],
+  ) {
+    setMetadata((currentMetadata) => {
+      if (!currentMetadata) return currentMetadata;
+
+      return {
+        ...currentMetadata,
+        [key]: value,
+      };
+    });
+  }
 
   return (
     <section>
@@ -43,9 +84,9 @@ export function TranscriptConverterPage() {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-200">
-              Markdown Draft
+              Article Settings
             </h2>
 
             <button
@@ -58,8 +99,82 @@ export function TranscriptConverterPage() {
             </button>
           </div>
 
+          {metadata ? (
+            <div className="mb-5 grid gap-3">
+              <input
+                value={metadata.title}
+                onChange={(event) =>
+                  updateMetadata("title", event.target.value)
+                }
+                className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-500"
+              />
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <select
+                  value={metadata.category}
+                  onChange={(event) =>
+                    updateMetadata("category", event.target.value)
+                  }
+                  className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-500"
+                >
+                  <option>React</option>
+                  <option>TypeScript</option>
+                  <option>FastAPI</option>
+                  <option>Python</option>
+                  <option>Learning</option>
+                  <option>General</option>
+                </select>
+
+                <select
+                  value={metadata.difficulty}
+                  onChange={(event) =>
+                    updateMetadata(
+                      "difficulty",
+                      event.target.value as ArticleMetadata["difficulty"],
+                    )
+                  }
+                  className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-500"
+                >
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+
+                <select
+                  value={metadata.type}
+                  onChange={(event) =>
+                    updateMetadata(
+                      "type",
+                      event.target.value as ArticleMetadata["type"],
+                    )
+                  }
+                  className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-500"
+                >
+                  <option>Technical Concept</option>
+                  <option>Course Guidance</option>
+                  <option>General Notes</option>
+                </select>
+              </div>
+
+              <input
+                value={tagsInput}
+                onChange={(event) => setTagsInput(event.target.value)}
+                placeholder="react, learning-strategy, course-notes"
+                className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-500"
+              />
+            </div>
+          ) : (
+            <p className="mb-5 text-sm text-slate-400">
+              Article settings will appear after you paste a transcript.
+            </p>
+          )}
+
+          <h2 className="mb-3 text-sm font-semibold text-slate-200">
+            Markdown Draft
+          </h2>
+
           {articleDraft ? (
-            <pre className="min-h-[520px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
+            <pre className="min-h-[420px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
               {articleDraft}
             </pre>
           ) : (
