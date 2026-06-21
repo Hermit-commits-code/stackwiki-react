@@ -1,7 +1,13 @@
-import { useState } from "react"
+import { useMemo, useState } from "react";
+import { generateArticleDraft } from "../features/transcripts/utils/generateArticleDraft";
 
 export function TranscriptConverterPage() {
-  const [transcript, setTranscript] = useState("")
+  const [transcript, setTranscript] = useState("");
+
+  const articleDraft = useMemo(
+    () => generateArticleDraft(transcript),
+    [transcript],
+  );
 
   return (
     <section>
@@ -13,8 +19,8 @@ export function TranscriptConverterPage() {
         <h1 className="mt-2 text-4xl font-bold">Transcript Converter</h1>
 
         <p className="mt-3 max-w-2xl text-slate-300">
-          Paste raw course transcripts and turn them into clean StackWiki article
-          drafts.
+          Paste raw course transcripts and turn them into clean StackWiki
+          article drafts.
         </p>
       </div>
 
@@ -32,34 +38,37 @@ export function TranscriptConverterPage() {
             value={transcript}
             onChange={(event) => setTranscript(event.target.value)}
             placeholder="Paste your raw transcript here..."
-            className="min-h-[420px] w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
+            className="min-h-[520px] w-full rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
           />
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <h2 className="mb-3 text-sm font-semibold text-slate-200">
-            Article Preview
-          </h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-200">
+              Markdown Draft
+            </h2>
 
-          {transcript.trim().length === 0 ? (
-            <p className="text-sm text-slate-400">
-              Your generated article preview will appear here.
-            </p>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(articleDraft)}
+              disabled={!articleDraft}
+              className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Copy Markdown
+            </button>
+          </div>
+
+          {articleDraft ? (
+            <pre className="min-h-[520px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
+              {articleDraft}
+            </pre>
           ) : (
-            <div className="space-y-4 text-slate-200">
-              <h3 className="text-2xl font-bold">Generated Article Draft</h3>
-
-              <p className="text-sm text-slate-400">
-                Transcript length: {transcript.length} characters
-              </p>
-
-              <div className="rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
-                {transcript}
-              </div>
-            </div>
+            <p className="text-sm text-slate-400">
+              Your generated markdown draft will appear here.
+            </p>
           )}
         </div>
       </div>
     </section>
-  )
+  );
 }
