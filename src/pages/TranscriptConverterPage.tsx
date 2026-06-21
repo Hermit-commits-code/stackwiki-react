@@ -11,6 +11,9 @@ export function TranscriptConverterPage() {
   const [metadata, setMetadata] = useState<ArticleMetadata | null>(null);
   const [tagsInput, setTagsInput] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<"editor" | "markdown" | "preview">(
+    "editor",
+  );
 
   useEffect(() => {
     if (!transcript.trim()) {
@@ -61,7 +64,11 @@ export function TranscriptConverterPage() {
       setSaveMessage("");
     }, 3000);
   }
+  const hasTranscript = transcript.trim().length > 0;
+  const hasMetadata = metadata !== null;
+  const hasDraft = articleDraft.trim().length > 0;
 
+  // Major Return
   return (
     <section>
       <div className="mb-8">
@@ -76,7 +83,34 @@ export function TranscriptConverterPage() {
           article drafts.
         </p>
       </div>
-
+      <div className="mb-6 grid gap-3 md:grid-cols-4">
+        {[
+          { label: "Transcript", complete: hasTranscript },
+          { label: "Metadata", complete: hasMetadata },
+          { label: "Draft", complete: hasDraft },
+          { label: "Ready to Save", complete: hasDraft },
+        ].map((step) => (
+          <div
+            key={step.label}
+            className={
+              step.complete
+                ? "rounded-xl border border-cyan-900 bg-cyan-950 p-4"
+                : "rounded-xl border border-slate-800 bg-slate-900 p-4"
+            }
+          >
+            <p
+              className={
+                step.complete
+                  ? "text-sm font-semibold text-cyan-200"
+                  : "text-sm font-semibold text-slate-400"
+              }
+            >
+              {step.complete ? "✓ " : "○ "}
+              {step.label}
+            </p>
+          </div>
+        ))}
+      </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <label
@@ -119,12 +153,31 @@ export function TranscriptConverterPage() {
               </button>
             </div>
           </div>
+
+          <div className="mb-4 flex rounded-lg border border-slate-800 bg-slate-950 p-1">
+            {["editor", "markdown", "preview"].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() =>
+                  setActiveTab(tab as "editor" | "markdown" | "preview")
+                }
+                className={
+                  activeTab === tab
+                    ? "flex-1 rounded-md bg-cyan-500 px-3 py-2 text-sm font-semibold capitalize text-slate-950"
+                    : "flex-1 rounded-md px-3 py-2 text-sm font-semibold capitalize text-slate-300 hover:text-white"
+                }
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
           {saveMessage ? (
             <p className="mt-3 rounded-lg border border-cyan-900 bg-cyan-950 px-4 py-3 text-sm text-cyan-200">
               {saveMessage}
             </p>
           ) : null}
-          {metadata ? (
+          {activeTab === "editor" && metadata ? (
             <div className="mb-5 grid gap-3">
               <input
                 value={metadata.title}
@@ -196,34 +249,42 @@ export function TranscriptConverterPage() {
 
           <div className="grid gap-4">
             <div>
-              <h2 className="mb-3 text-sm font-semibold text-slate-200">
-                Markdown Draft
-              </h2>
+              {activeTab === "markdown" && (
+                <>
+                  <h2 className="mb-3 text-sm font-semibold text-slate-200">
+                    Markdown Draft
+                  </h2>
 
-              {articleDraft ? (
-                <pre className="max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
-                  {articleDraft}
-                </pre>
-              ) : (
-                <p className="text-sm text-slate-400">
-                  Your generated markdown draft will appear here.
-                </p>
+                  {articleDraft ? (
+                    <pre className="max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm leading-6 text-slate-300">
+                      {articleDraft}
+                    </pre>
+                  ) : (
+                    <p className="text-sm text-slate-400">
+                      Your generated markdown draft will appear here.
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
             <div>
-              <h2 className="mb-3 text-sm font-semibold text-slate-200">
-                Rendered Preview
-              </h2>
+              {activeTab === "preview" && (
+                <>
+                  <h2 className="mb-3 text-sm font-semibold text-slate-200">
+                    Rendered Preview
+                  </h2>
 
-              {articleDraft ? (
-                <div className="prose prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-950 p-5 text-slate-200">
-                  <ReactMarkdown>{articleDraft}</ReactMarkdown>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">
-                  Your rendered article preview will appear here.
-                </p>
+                  {articleDraft ? (
+                    <div className="prose prose-invert max-w-none rounded-lg border border-slate-800 bg-slate-950 p-5 text-slate-200">
+                      <ReactMarkdown>{articleDraft}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">
+                      Your rendered article preview will appear here.
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </div>
