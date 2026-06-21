@@ -9,6 +9,7 @@ export function TranscriptConverterPage() {
   const [transcript, setTranscript] = useState("");
   const [metadata, setMetadata] = useState<ArticleMetadata | null>(null);
   const [tagsInput, setTagsInput] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     if (!transcript.trim()) {
@@ -50,6 +51,16 @@ export function TranscriptConverterPage() {
     });
   }
 
+  function handleSaveDraft() {
+    if (!articleDraft) return;
+
+    setSaveMessage("Draft saved locally. Backend save will be added later.");
+
+    window.setTimeout(() => {
+      setSaveMessage("");
+    }, 3000);
+  }
+
   return (
     <section>
       <div className="mb-8">
@@ -88,17 +99,30 @@ export function TranscriptConverterPage() {
             <h2 className="text-sm font-semibold text-slate-200">
               Article Settings
             </h2>
-
-            <button
-              type="button"
-              onClick={() => navigator.clipboard.writeText(articleDraft)}
-              disabled={!articleDraft}
-              className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Copy Markdown
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                disabled={!articleDraft}
+                className="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 hover:border-cyan-500 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Save Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(articleDraft)}
+                disabled={!articleDraft}
+                className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Copy Markdown
+              </button>
+            </div>
           </div>
-
+          {saveMessage ? (
+            <p className="mt-3 rounded-lg border border-cyan-900 bg-cyan-950 px-4 py-3 text-sm text-cyan-200">
+              {saveMessage}
+            </p>
+          ) : null}
           {metadata ? (
             <div className="mb-5 grid gap-3">
               <input
