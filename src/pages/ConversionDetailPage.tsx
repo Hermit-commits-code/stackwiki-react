@@ -1,10 +1,11 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { saveArticle } from "../features/articles/storage/articleStorage";
 import {
+  deleteConversion,
   getSavedConversions,
   updateConversion,
-  deleteConversion,
 } from "../features/transcripts/storage/conversionStorage";
 
 export function ConversionDetailPage() {
@@ -44,6 +45,7 @@ export function ConversionDetailPage() {
       ...conversion,
       markdown,
     });
+
     setSaveMessage("Changes saved locally.");
 
     window.setTimeout(() => {
@@ -51,7 +53,34 @@ export function ConversionDetailPage() {
     }, 3000);
   }
 
+  function handlePublishArticle() {
+    if (!conversion) return;
+
+    saveArticle({
+      id: Date.now(),
+      title: conversion.title,
+      category: conversion.category,
+      slug: conversion.title.toLowerCase().replaceAll(" ", "-"),
+      difficulty: conversion.metadata.difficulty,
+      description: "Article generated from transcript conversion.",
+      tags: conversion.metadata.tags,
+      content: markdown,
+      markdown,
+      createdAt: new Date().toISOString(),
+    });
+
+    updateConversion({
+      ...conversion,
+      markdown,
+      status: "Published",
+    });
+
+    setSaveMessage("Draft published to articles.");
+  }
+
   function handleDeleteDraft() {
+    if (!conversion) return;
+
     const confirmed = window.confirm(
       "Delete this draft? This cannot be undone.",
     );
@@ -61,6 +90,7 @@ export function ConversionDetailPage() {
     deleteConversion(conversion.id);
     navigate("/conversions");
   }
+
   return (
     <section>
       <Link
@@ -98,11 +128,20 @@ export function ConversionDetailPage() {
 
           <button
             type="button"
+            onClick={handlePublishArticle}
+            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400"
+          >
+            Publish Article
+          </button>
+
+          <button
+            type="button"
             onClick={() => navigator.clipboard.writeText(markdown)}
             className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400"
           >
             Copy Markdown
           </button>
+
           <button
             type="button"
             onClick={handleDeleteDraft}

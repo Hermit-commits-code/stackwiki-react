@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArticleCard } from "../features/articles/components/ArticleCard";
 import { mockArticles } from "../features/articles/data/mockArticles";
+import { getSavedArticles } from "../features/articles/storage/articleStorage";
 
 export function ArticlesPage() {
   const [search, setSearch] = useState("");
@@ -9,9 +10,13 @@ export function ArticlesPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") ?? "All";
-
+  const articles = [...getSavedArticles(), ...mockArticles];
   const filteredArticles = useMemo(() => {
-    return mockArticles.filter((article) => {
+    const articles = useMemo(
+      () => [...getSavedArticles(), ...mockArticles],
+      [],
+    );
+    return articles.filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(search.toLowerCase()) ||
         article.description.toLowerCase().includes(search.toLowerCase()) ||
@@ -28,7 +33,7 @@ export function ArticlesPage() {
 
       return matchesSearch && matchesDifficulty && matchesCategory;
     });
-  }, [search, difficulty, selectedCategory]);
+  }, [search, difficulty, selectedCategory, articles]);
 
   return (
     <section>
