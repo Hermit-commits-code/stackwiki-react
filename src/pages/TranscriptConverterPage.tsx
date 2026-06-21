@@ -5,6 +5,7 @@ import {
   type ArticleMetadata,
 } from "../features/transcripts/utils/generateArticleDraft";
 import ReactMarkdown from "react-markdown";
+import { saveConversion } from "../features/transcripts/storage/conversionStorage";
 
 export function TranscriptConverterPage() {
   const [transcript, setTranscript] = useState("");
@@ -54,11 +55,29 @@ export function TranscriptConverterPage() {
       };
     });
   }
-
   function handleSaveDraft() {
-    if (!articleDraft) return;
+    if (!articleDraft || !metadata) return;
 
-    setSaveMessage("Draft saved locally. Backend save will be added later.");
+    const tags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    saveConversion({
+      id: crypto.randomUUID(),
+      title: metadata.title,
+      category: metadata.category,
+      status: "Draft",
+      markdown: articleDraft,
+      transcript,
+      metadata: {
+        ...metadata,
+        tags,
+      },
+      createdAt: new Date().toISOString(),
+    });
+
+    setSaveMessage("Draft saved locally.");
 
     window.setTimeout(() => {
       setSaveMessage("");
