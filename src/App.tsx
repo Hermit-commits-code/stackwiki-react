@@ -5,6 +5,7 @@ import { ArticlesPage } from "./pages/ArticlesPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
+import { TranscriptConverterPage } from "./pages/TranscriptConverterPage";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
           <Route
             path="/articles/:category/:slug"
             element={<ArticleDetailPage />}
+          />
+          <Route
+            path="/transcript-converter"
+            element={<TranscriptConverterPage />}
           />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/login" element={<LoginPage />} />
