@@ -1,10 +1,14 @@
+import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
 import { mockArticles } from "../features/articles/data/mockArticles";
+import { getSavedArticles } from "../features/articles/storage/articleStorage";
 
 export function ArticleDetailPage() {
   const { category, slug } = useParams();
 
-  const article = mockArticles.find(
+  const articles = [...getSavedArticles(), ...mockArticles];
+
+  const article = articles.find(
     (article) =>
       article.category.toLowerCase() === category?.toLowerCase() &&
       article.slug === slug,
@@ -64,8 +68,12 @@ export function ArticleDetailPage() {
 
         <hr className="my-8 border-slate-800" />
 
-        <div className="space-y-4 text-slate-200">
-          <p>{article.content}</p>
+        <div className="prose prose-invert max-w-none text-slate-200">
+          {"markdown" in article ? (
+            <ReactMarkdown>{article.markdown}</ReactMarkdown>
+          ) : (
+            <p>{article.content}</p>
+          )}
         </div>
       </div>
     </article>
