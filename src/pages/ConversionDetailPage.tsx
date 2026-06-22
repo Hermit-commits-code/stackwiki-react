@@ -92,6 +92,8 @@ export function ConversionDetailPage() {
   }
 
   function handleDownloadMarkdown() {
+    if (!conversion) return;
+
     const fileName = `${conversion.title.toLowerCase().replaceAll(" ", "-")}.md`;
 
     const blob = new Blob([markdown], { type: "text/markdown" });

@@ -69,7 +69,7 @@ export function ArticleDetailPage() {
         <hr className="my-8 border-slate-800" />
 
         <div className="prose prose-invert max-w-none text-slate-200">
-          {"markdown" in article ? (
+          {"markdown" in article && typeof article.markdown === "string" ? (
             <ReactMarkdown>{article.markdown}</ReactMarkdown>
           ) : (
             <p>{article.content}</p>
