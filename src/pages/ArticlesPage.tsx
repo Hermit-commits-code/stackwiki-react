@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { getArticles } from "../features/articles/api/articleApi";
 import { ArticleCard } from "../features/articles/components/ArticleCard";
 import { mockArticles } from "../features/articles/data/mockArticles";
-import { getSavedArticles } from "../features/articles/storage/articleStorage";
 
 export function ArticlesPage() {
   const [search, setSearch] = useState("");
@@ -10,12 +11,36 @@ export function ArticlesPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") ?? "All";
-  const articles = [...getSavedArticles(), ...mockArticles];
+
+  const {
+    data: apiArticles = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["articles"],
+    queryFn: getArticles,
+  });
+
+  const articles = useMemo(() => {
+    return [
+      ...apiArticles.map((article) => ({
+        id: article.id,
+        title: article.title,
+        category: article.category,
+        slug: article.slug,
+        difficulty: article.difficulty as
+          | "Beginner"
+          | "Intermediate"
+          | "Advanced",
+        description: article.description,
+        tags: [],
+        content: article.content,
+      })),
+      ...mockArticles,
+    ];
+  }, [apiArticles]);
+
   const filteredArticles = useMemo(() => {
-    const articles = useMemo(
-      () => [...getSavedArticles(), ...mockArticles],
-      [],
-    );
     return articles.filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -33,7 +58,7 @@ export function ArticlesPage() {
 
       return matchesSearch && matchesDifficulty && matchesCategory;
     });
-  }, [search, difficulty, selectedCategory, articles]);
+  }, [articles, search, difficulty, selectedCategory]);
 
   return (
     <section>
@@ -48,6 +73,18 @@ export function ArticlesPage() {
           Search your developer notes by topic, difficulty, and tags.
         </p>
       </div>
+
+      {isLoading ? (
+        <p className="mb-4 rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">
+          Loading articles from backend...
+        </p>
+      ) : null}
+
+      {isError ? (
+        <p className="mb-4 rounded-lg border border-red-900 bg-red-950 p-4 text-sm text-red-200">
+          Could not load backend articles. Showing local mock articles.
+        </p>
+      ) : null}
 
       <div className="mb-8 grid gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 md:grid-cols-[1fr_220px_220px]">
         <input
@@ -74,6 +111,9 @@ export function ArticlesPage() {
           <option value="react">React</option>
           <option value="typescript">TypeScript</option>
           <option value="fastapi">FastAPI</option>
+          <option value="node">Node</option>
+          <option value="express">Express</option>
+          <option value="postgresql">PostgreSQL</option>
         </select>
 
         <select
