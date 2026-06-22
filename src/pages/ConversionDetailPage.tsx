@@ -7,6 +7,8 @@ import {
   getSavedConversions,
   updateConversion,
 } from "../features/transcripts/storage/conversionStorage";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createArticle } from "../features/articles/api/articleApi";
 
 export function ConversionDetailPage() {
   const navigate = useNavigate();
@@ -37,6 +39,15 @@ export function ConversionDetailPage() {
       </section>
     );
   }
+  const queryClient = useQueryClient();
+
+  const publishArticleMutation = useMutation({
+    mutationFn: createArticle,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      setSaveMessage("Draft published to backend articles.");
+    },
+  });
 
   function handleSaveChanges() {
     if (!conversion) return;
@@ -56,17 +67,13 @@ export function ConversionDetailPage() {
   function handlePublishArticle() {
     if (!conversion) return;
 
-    saveArticle({
-      id: Date.now(),
+    publishArticleMutation.mutate({
       title: conversion.title,
-      category: conversion.category,
       slug: conversion.title.toLowerCase().replaceAll(" ", "-"),
-      difficulty: conversion.metadata.difficulty,
       description: "Article generated from transcript conversion.",
-      tags: conversion.metadata.tags,
       content: markdown,
-      markdown,
-      createdAt: new Date().toISOString(),
+      category: conversion.category,
+      difficulty: conversion.metadata.difficulty,
     });
 
     updateConversion({
@@ -74,8 +81,6 @@ export function ConversionDetailPage() {
       markdown,
       status: "Published",
     });
-
-    setSaveMessage("Draft published to articles.");
   }
 
   function handleDeleteDraft() {
@@ -144,9 +149,12 @@ export function ConversionDetailPage() {
           <button
             type="button"
             onClick={handlePublishArticle}
-            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400"
+            disabled={publishArticleMutation.isPending}
+            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Publish Article
+            {publishArticleMutation.isPending
+              ? "Publishing..."
+              : "Publish Article"}
           </button>
 
           <button
