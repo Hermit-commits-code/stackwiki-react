@@ -91,6 +91,19 @@ export function ConversionDetailPage() {
     navigate("/conversions");
   }
 
+  function handleDownloadMarkdown() {
+    const fileName = `${conversion.title.toLowerCase().replaceAll(" ", "-")}.md`;
+
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
   return (
     <section>
       <Link
@@ -141,7 +154,13 @@ export function ConversionDetailPage() {
           >
             Copy Markdown
           </button>
-
+          <button
+            type="button"
+            onClick={handleDownloadMarkdown}
+            className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-cyan-500"
+          >
+            Download .md
+          </button>
           <button
             type="button"
             onClick={handleDeleteDraft}
