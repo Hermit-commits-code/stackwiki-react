@@ -1,20 +1,57 @@
+import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
+import { getArticleBySlug } from "../features/articles/api/articleApi";
 import { mockArticles } from "../features/articles/data/mockArticles";
 import { getSavedArticles } from "../features/articles/storage/articleStorage";
 
 export function ArticleDetailPage() {
   const { category, slug } = useParams();
 
-  const articles = [...getSavedArticles(), ...mockArticles];
+  const localArticles = [...getSavedArticles(), ...mockArticles];
 
-  const article = articles.find(
+  const localArticle = localArticles.find(
     (article) =>
       article.category.toLowerCase() === category?.toLowerCase() &&
       article.slug === slug,
   );
 
-  if (!article) {
+  const {
+    data: apiArticle,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["article", slug],
+    queryFn: () => getArticleBySlug(slug ?? ""),
+    enabled: Boolean(slug) && !localArticle,
+  });
+
+  const article = apiArticle
+    ? {
+        id: apiArticle.id,
+        title: apiArticle.title,
+        category: apiArticle.category,
+        slug: apiArticle.slug,
+        difficulty: apiArticle.difficulty as
+          | "Beginner"
+          | "Intermediate"
+          | "Advanced",
+        description: apiArticle.description,
+        tags: [],
+        content: apiArticle.content,
+        markdown: apiArticle.content,
+      }
+    : localArticle;
+
+  if (isLoading) {
+    return (
+      <section className="rounded-xl border border-slate-800 bg-slate-900 p-8">
+        <p className="text-slate-300">Loading article...</p>
+      </section>
+    );
+  }
+
+  if (!article || (isError && !localArticle)) {
     return (
       <section className="rounded-xl border border-slate-800 bg-slate-900 p-8">
         <h1 className="text-3xl font-bold">Article not found</h1>
@@ -55,16 +92,18 @@ export function ArticleDetailPage() {
 
         <p className="mt-4 text-lg text-slate-300">{article.description}</p>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {article.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-400"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
+        {article.tags.length > 0 ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {article.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-400"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         <hr className="my-8 border-slate-800" />
 

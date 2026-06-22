@@ -42,12 +42,13 @@ export function ArticlesPage() {
 
   const filteredArticles = useMemo(() => {
     return articles.filter((article) => {
+      const searchText = search.toLowerCase();
+
       const matchesSearch =
-        article.title.toLowerCase().includes(search.toLowerCase()) ||
-        article.description.toLowerCase().includes(search.toLowerCase()) ||
-        article.tags.some((tag) =>
-          tag.toLowerCase().includes(search.toLowerCase()),
-        );
+        article.title.toLowerCase().includes(searchText) ||
+        article.description.toLowerCase().includes(searchText) ||
+        article.category.toLowerCase().includes(searchText) ||
+        article.tags.some((tag) => tag.toLowerCase().includes(searchText));
 
       const matchesDifficulty =
         difficulty === "All" || article.difficulty === difficulty;
@@ -110,10 +111,10 @@ export function ArticlesPage() {
           <option>All</option>
           <option value="react">React</option>
           <option value="typescript">TypeScript</option>
-          <option value="fastapi">FastAPI</option>
           <option value="node">Node</option>
           <option value="express">Express</option>
           <option value="postgresql">PostgreSQL</option>
+          <option value="prisma">Prisma</option>
         </select>
 
         <select
@@ -133,11 +134,20 @@ export function ArticlesPage() {
         {filteredArticles.length === 1 ? "" : "s"}
       </p>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {filteredArticles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
-      </div>
+      {filteredArticles.length === 0 ? (
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 text-center">
+          <h2 className="text-2xl font-bold">No articles found</h2>
+          <p className="mt-3 text-slate-300">
+            Try changing your search or filters.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-3">
+          {filteredArticles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
